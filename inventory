@@ -1,0 +1,5 @@
+[mrbs]
+mrbs ansible_host=127.0.0.1 ansible_port=22 
+
+[postgre]
+postgre ansible_host=127.0.0.1 ansible_port=22
