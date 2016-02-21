@@ -14,16 +14,22 @@
       apt: name={{item}} state=installed
       with_items:
         - php5
-    - name: download mrbs
-      get_url: url={{mrbs_file_link}} dest={{tmp_dir}}
+
+    - name: create directory
+      file: path={{tmp_dir}}/mrbs state=directory
 
     - name: unarchive mrbs
-      unarchive: src={{tmp_dir}}/mrbs-1.5.0.tar.gz
+      unarchive: src={{mrbs_file_link}} dest={{tmp_dir}}/mrbs copy=no
+
+    - name: Show mrbs
+      shell: ls -al {{tmp_dir}}/mrbs
+      ignore_errors: yes
 
 - hosts: postgre
   gather_facts: no
   become: True
-  become_user: postgres
+  become_method: sudo
+  become_user: root
 
   vars:
     dbname: mrbs
@@ -32,12 +38,21 @@
 
   tasks:
     - name: install postgresql
-      apt: name={{item}}
+      apt: name={{item}} update_cache=yes cache_valid_time=3600
       with_items:
         - postgresql
         - libpq-dev
         - python-psycopg2
+    - name: create postgre group
+      group: name=postgres state=present
+
+    - name: create postgre user
+      user: name=postgres group="postgres" state=present
+
     - name: ensure database is created
+      become: True
+      become_user: postgres
+      become_method: sudo
       postgresql_db: name={{dbname}}
                        encoding='UTF8'
                        lc_collate='en_US.UTF-8'
