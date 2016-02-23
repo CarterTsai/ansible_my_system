@@ -10,8 +10,11 @@
     mrbs_dir_name: "{{tmp_dir}}/mrbs-1.5.0"
 
   tasks:
+    - name: update cache
+      apt: update_cache=yes cache_valid_time=3600
+      
     - name: install lib
-      apt: name={{item}} state=installed
+      apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
       with_items:
         - php5
 
@@ -38,7 +41,7 @@
 
   tasks:
     - name: install postgresql
-      apt: name={{item}} update_cache=yes cache_valid_time=3600
+      apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
       with_items:
         - postgresql
         - libpq-dev
@@ -51,12 +54,13 @@
 
     - name: ensure database is created
       become: True
-      become_user: postgres
       become_method: sudo
+      become_user: postgres
       postgresql_db: name={{dbname}}
                        encoding='UTF8'
                        lc_collate='en_US.UTF-8'
                        lc_ctype='en_US.UTF-8'
+                       template='template0'
 
     - name: create database user
       postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL
