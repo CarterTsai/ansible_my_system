@@ -37,3 +37,17 @@ $> ansible-playbook --verbose \
                     --ask-become-pass \
                     -i inventory playbook.yml
 ```
+
+
+### Docker
+#### Generator SSH Key and put public key to sshkey directory
+```
+$> ssh-keygen -t rsa -b 4096 -C "test"
+
+$> cp ~/.ssh/id_rsa.pub ./sshkey/
+```
+
+#### Build Image
+```
+$> docker build -t cartertsai/debain-ssh .
+```
