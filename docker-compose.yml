@@ -1,0 +1,12 @@
+mebs:
+    image: cartertsai/debain-ssh
+    ports:
+        - "2222:22"
+        - "8080:80"
+    link: db
+db:
+    image: cartertsai/debain-ssh        
+    ports:
+        - "2200:22"
+        - "8080:80"
+        

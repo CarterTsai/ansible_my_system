@@ -42,9 +42,7 @@ $> ansible-playbook --verbose \
 ### Docker
 #### Generator SSH Key and put public key to sshkey directory
 ```
-$> ssh-keygen -t rsa -b 4096 -C "test"
-
-$> cp ~/.ssh/id_rsa.pub ./sshkey/
+$> ssh-keygen -t rsa -b 4096 -C "test" -N "" -f ./sshkey/id_rsa
 ```
 
 #### Build Image
@@ -54,5 +52,17 @@ $> docker build -t cartertsai/debain-ssh .
 
 #### RUN Docker 
 ```
-$> docker run -d -p 2222:22 cartertsai/debain-ssh
+$> docker run -d -p 2222:22 cartertsai/debain-ssh -name mrbs
+```
+
+```
+$> docker run -d -p 2200:22 cartertsai/debain-ssh -name db
+```
+
+or 
+
+
+### PING Docker
+```
+$> ansible all -m ping -i inventory
 ```
