@@ -9,4 +9,6 @@ RUN mkdir -p /root/.ssh
 ADD ./sshkey/id_rsa.pub /root/.ssh
 ADD ./config/run.sh run.sh
 
+EXPOSE 22
+
 CMD ["/root/run.sh"]

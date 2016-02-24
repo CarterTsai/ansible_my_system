@@ -51,3 +51,8 @@ $> cp ~/.ssh/id_rsa.pub ./sshkey/
 ```
 $> docker build -t cartertsai/debain-ssh .
 ```
+
+#### RUN Docker 
+```
+$> docker run -d -p 2222:22 cartertsai/debain-ssh
+```
