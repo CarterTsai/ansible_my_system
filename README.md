@@ -37,6 +37,11 @@ $> ansible-playbook --verbose \
                     --ask-become-pass \
                     -i inventory playbook.yml
 ```
+Run particular group
+```
+$> ansible-playbook -l db --verbose \
+                    -i inventory playbook.yml
+```
 
 
 ### Docker

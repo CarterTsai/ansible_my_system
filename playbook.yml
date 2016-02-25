@@ -52,6 +52,10 @@
     - name: create postgre user
       user: name=postgres password="postgres" group="postgres" state=present
     
+    - name: create directory
+      file: path=/var/run/postgresql state=directory 
+      file: path=/var/run/postgresql state=directory mode=postgres
+    
     - name: create database user
       postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL role_attr_flags=CREATEDB,SUPERUSER,CREATEROLE state=present
 
@@ -63,7 +67,7 @@
                        lc_collate='en_US.UTF-8'
                        lc_ctype='en_US.UTF-8'
                        template='template0'
-                       port=5452
+                       port=5432
 
     - name: ensure user does not have unnecessary privilege
       postgresql_user: name={{dbuser}} role_attr_flags=NOSUPERUSER,NOCREATEDB

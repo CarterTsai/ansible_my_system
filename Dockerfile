@@ -11,7 +11,7 @@ RUN chmod 0755 /var/run/sshd
 ADD ./sshkey/id_rsa.pub /root/.ssh/id_rsa.pub
 RUN cat /root/.ssh/id_rsa.pub >> /root/.ssh/authorized_keys
 ADD ./config/run.sh /root/run.sh
-RUN apt-get -y install python
+RUN apt-get -y install python python-psycopg2
 
 EXPOSE 22
 EXPOSE 5432
