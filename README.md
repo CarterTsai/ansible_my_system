@@ -61,7 +61,6 @@ $> docker run -d -p 2200:22 cartertsai/debain-ssh -name db
 
 or 
 
-
 ### PING Docker
 ```
 $> ansible all -m ping -i inventory

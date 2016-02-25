@@ -1,7 +1,7 @@
 #mrbs ansible_host=127.0.0.1 ansible_ssh_user=vagrant ansible_port=2222 ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key
 #postgre ansible_host=127.0.0.1 ansible_ssh_user=vagrant ansible_port=2200 ansible_ssh_private_key_file=~/.vagrant.d/insecure_private_key
 
-mrbs ansible_host=192.168.99.100  ansible_port=2222
+mrbs ansible_host=127.0.0.1  ansible_port=2222
 postgre ansible_host=127.0.0.1  ansible_port=2200
 
 [web]
