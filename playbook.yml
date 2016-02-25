@@ -53,7 +53,6 @@
       user: name=postgres password="postgres" group="postgres" state=present
     
     - name: create directory
-      file: path=/var/run/postgresql state=directory 
       file: path=/var/run/postgresql state=directory mode=postgres
     
     - name: create database user
