@@ -10,5 +10,5 @@ db:
     image: cartertsai/debain-ssh        
     ports:
         - "2200:22"
-        - "8880:80"
+        - "5432:5432"
         

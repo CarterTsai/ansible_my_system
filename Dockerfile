@@ -15,5 +15,6 @@ RUN apt-get -y install python
 
 EXPOSE 22
 EXPOSE 5432
+EXPOSE 80
 
 CMD ["/bin/bash", "run.sh"]

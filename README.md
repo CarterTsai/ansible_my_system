@@ -28,7 +28,7 @@ https://github.com/ansible/ansible-examples/blob/master/language_features/postgr
 
 ### RUN
 ```
-ansible-playbook --verbose \
+$> ansible-playbook --verbose \
                     -i inventory playbook.yml
 ```
 
