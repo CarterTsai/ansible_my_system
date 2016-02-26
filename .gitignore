@@ -1,0 +1,3 @@
+.vagrant
+sshkey/id_rsa
+sshkey/id_rsa.pub

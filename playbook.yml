@@ -12,7 +12,7 @@
   tasks:
     - name: update cache
       apt: update_cache=yes cache_valid_time=3600
-      
+
     - name: install lib
       apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
       with_items:
@@ -38,23 +38,100 @@
     dbname: mrbs
     dbuser: mrbsuser
     dbpassword: testtest
+    pg_major: 9.4
+    pg_version: 9.4.6-1.pgdg80+1
+
+  environment:
+    - LANG: en_US.utf8
+    - PG_MAJOR: "{{pg_major}}"
+    - PG_VERSION: "{{pg_version}}"
+    - PGDATA: /var/lib/postgresql/data
 
   tasks:
-    - name: install postgresql
-      apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
-      with_items:
-        - postgresql
-        - libpq-dev
-        - python-psycopg2
+    - name: show environment
+      command: env
+
+    - name: set path
+      shell: "export PATH=$PATH:/usr/lib/postgresql/$PG_MAJOR/bin"
+
+    - name: update source-list
+      shell: echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
+
+    - name: apt update
+      apt: update_cache=yes cache_valid_time=3600
+
     - name: create postgre group
-      group: name=postgres state=present
+      group: name=postgres gid=999 state=present
 
     - name: create postgre user
-      user: name=postgres password="postgres" group="postgres" state=present
-    
+      user: name=postgres password="postgres" group="postgres" uid=999 state=present
+
+    - name: install ca-certificates
+      apt: name={{item}} state=present update_cache=yes cache_valid_time=3600
+      with_items:
+        - ca-certificates
+
+    - name: Add an apt key by id from a keyserver
+      command: gpg --keyserver ha.pool.sks-keyservers.net --recv-keys B42F6819007F00F88E364FD4036A9C25BF357DD4
+
+    - name: grab gosu for easy step-down from root
+      command: "{{item}}"
+      with_items:
+        - 'rm -rf /var/lib/apt/lists/*'
+
+    - name: download gosu-amd64
+      get_url:
+        url: "https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64"
+        dest: /usr/local/bin/gosu
+    - name: download gosu-amd64.asc
+      get_url:
+        url: "https://github.com/tianon/gosu/releases/download/1.7/gosu-amd64.asc"
+        dest: /usr/local/bin/gosu.asc
+
+    - name: verify gosu
+      command: "{{item}}"
+      with_items:
+        - 'gpg --verify /usr/local/bin/gosu.asc'
+        - 'rm /usr/local/bin/gosu.asc'
+        - 'chmod +x /usr/local/bin/gosu'
+
+    - name: install ca-certificates
+      apt: name={{item}} purge=yes state=absent
+      with_items:
+          - ca-certificates
+
+    - name: install locales
+      apt: name=locales state=present update_cache=yes cache_valid_time=3600
+
+    - name: set locale to en_US.UTF8
+      shell: localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias ${LANG}
+
+    - name: auth key for postgres
+      shell: apt-key adv --keyserver ha.pool.sks-keyservers.net --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
+
+    - name: apt update
+      apt: update_cache=yes
+
+    - name: install postgresql-common
+      apt: name=postgresql-common state=present
+
+    - name: createclusters set false
+      shell: sed -ri 's/#(create_main_cluster) .*$/\1 = false/' /etc/postgresql-common/createcluster.conf
+      # lineinfile: dest=/etc/postgresql-common/createcluster.conf regexp='#(create_main_cluster) .*$' line='\1 = false' state=present
+
+    - name: install postgresql
+      apt: name={{item}} state=present
+      with_items:
+        - postgresql-{{pg_major}}={{pg_version}}
+        - postgresql-contrib-{{pg_major}}={{pg_version}}
+        - libpq-dev
+        - python-psycopg2
+    - name: remove apt list file
+      shell: rm -rf /var/lib/apt/lists/*
+
     - name: create directory
-      file: path=/var/run/postgresql state=directory mode=postgres
-    
+      file: path=/var/run/postgresql state=directory owner=postgres recurse=yes
+
     - name: create database user
       postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL role_attr_flags=CREATEDB,SUPERUSER,CREATEROLE state=present
 
