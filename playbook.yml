@@ -1,6 +1,6 @@
 ---
 - hosts: mrbs
-  gather_facts: no
+  gather_facts: yes
   become: True
   become_method: sudo
   become_user: root
@@ -29,7 +29,7 @@
       ignore_errors: yes
 
 - hosts: postgre
-  gather_facts: no
+  gather_facts: True
   become: True
   become_method: sudo
   become_user: root
@@ -43,22 +43,21 @@
 
   environment:
     - LANG: en_US.utf8
+    - LC_ALL: en_US.utf8
     - PG_MAJOR: "{{pg_major}}"
     - PG_VERSION: "{{pg_version}}"
     - PGDATA: /var/lib/postgresql/data
+    - PATH: "{{ ansible_env.PATH }}:/usr/lib/postgresql/{{pg_major}}/bin"
 
   tasks:
     - name: show environment
       command: env
 
-    - name: set path
-      shell: "export PATH=$PATH:/usr/lib/postgresql/$PG_MAJOR/bin"
-
     - name: update source-list
       shell: echo 'deb http://apt.postgresql.org/pub/repos/apt/ jessie-pgdg main' $PG_MAJOR > /etc/apt/sources.list.d/pgdg.list
 
     - name: apt update
-      apt: update_cache=yes cache_valid_time=3600
+      apt: update_cache=yes
 
     - name: create postgre group
       group: name=postgres gid=999 state=present
@@ -112,6 +111,15 @@
     - name: apt update
       apt: update_cache=yes
 
+    - name: ls PATH variable
+      command: "echo $PATH"
+
+    # - name: download startup script
+    #   get_url:
+    #     url: "https://raw.githubusercontent.com/docker-library/postgres/443c7947d548b1c607e06f7a75ca475de7ff3284/9.4/docker-entrypoint.sh"
+    #     dest: /root/docker-entrypoint.sh
+    #     validate_certs: no
+
     - name: install postgresql-common
       apt: name=postgresql-common state=present
 
@@ -127,23 +135,25 @@
         - libpq-dev
         - python-psycopg2
     - name: remove apt list file
-      shell: rm -rf /var/lib/apt/lists/*
+      #shell: rm -rf /var/lib/apt/lists/*
+      file: path=/var/lib/apt/lists/* state=absent
 
     - name: create directory
       file: path=/var/run/postgresql state=directory owner=postgres recurse=yes
 
-    - name: create database user
-      postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL role_attr_flags=CREATEDB,SUPERUSER,CREATEROLE state=present
+    - name: initdb and run postgres
+      shell: "gosu postgres initdb | gosu postgres pg_ctl -D $PGDATA -l logfile start"
 
     - name: ensure database is created
       postgresql_db: name={{dbname}}
-                       login_user={{dbuser}}
-                       login_password={{dbpassword}}
                        encoding='UTF8'
                        lc_collate='en_US.UTF-8'
                        lc_ctype='en_US.UTF-8'
                        template='template0'
                        port=5432
+
+    - name: create database user
+      postgresql_user: db={{dbname}} name={{dbuser}} password={{dbpassword}} priv=ALL role_attr_flags=CREATEDB,SUPERUSER,CREATEROLE state=present
 
     - name: ensure user does not have unnecessary privilege
       postgresql_user: name={{dbuser}} role_attr_flags=NOSUPERUSER,NOCREATEDB

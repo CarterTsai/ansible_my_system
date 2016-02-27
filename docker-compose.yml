@@ -3,12 +3,13 @@ mrbs:
     ports:
         - "2222:22"
         - "8080:80"
-    links: 
+    links:
         - db
-    
+    restart: always
+
 db:
-    image: cartertsai/debain-ssh        
+    image: cartertsai/debain-ssh
     ports:
         - "2200:22"
         - "5432:5432"
-        
+    restart: always
